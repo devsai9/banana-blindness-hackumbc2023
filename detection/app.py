@@ -510,10 +510,11 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
         cv.putText(image, "Finger Gesture:" + finger_gesture_text, (10, 60),
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2,
                    cv.LINE_AA)
-        # Press "d" if the hand is closed
         
-        if hand_sign_text == "Close" and previousHand!=hand_sign_text:
+        # Gesture detection
+        if hand_sign_text == "Close" and previousHand != hand_sign_text:
             keyboard.press_and_release("space")
+
         previousHand = hand_sign_text
     return image, previousHand 
 
