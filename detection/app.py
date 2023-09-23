@@ -147,7 +147,7 @@ def main():
                 if hand_sign_id == 2:  # Point gesture
                     point_history.append(landmark_list[8])
                     mouse.move(landmark_list[8][0], landmark_list[8][1], absolute=True, duration=0.1)
-                else:
+                else:                                                                                                                                                            
                     point_history.append([0, 0])
 
                 # Finger gesture classification
@@ -516,6 +516,8 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
         # Gesture detection
         if hand_sign_text == "Close" and previousHand != hand_sign_text:
             keyboard.press_and_release("space")
+        if hand_sign_text == "Open" and previousHand == "Pointer":
+            mouse.click(button='left')
 
         previousHand = hand_sign_text
     return image, previousHand 
