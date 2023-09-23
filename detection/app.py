@@ -101,6 +101,7 @@ def main():
     #  ########################################################################
     mode = 0
     previousHand = ""
+    previousIndexY, previousMiddleY = 0, 0
     while True:
         fps = cvFpsCalc.get()
 
@@ -152,6 +153,22 @@ def main():
                 if hand_sign_id == 2:
                     target_x, target_y = landmark_list[8][0], landmark_list[8][1]
                     mouse.move(target_x, target_y, absolute=True)
+
+                indexFingerY = landmark_list[8][1]
+                middleFingerY = landmark_list[12][1] 
+
+                if indexFingerY<landmark_list[11][1] and landmark_list[10][1]<landmark_list[9][1]:
+                    if middleFingerY<landmark_list[7][1] and landmark_list[7][1]<landmark_list[6][1]:
+                        if abs(indexFingerY-middleFingerY)<130:
+                            previousAverage = (previousMiddleY+previousIndexY)/2
+                            currentAverage = (indexFingerY+middleFingerY)/2
+                            scroll = currentAverage-previousAverage
+                            scroll=-scroll/20
+                            mouse.wheel(delta=scroll)
+
+
+                previousIndexY=indexFingerY
+                previousMiddleY=middleFingerY
 
                 # Finger gesture classification
                 finger_gesture_id = 0
