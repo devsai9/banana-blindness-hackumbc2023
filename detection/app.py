@@ -7,6 +7,7 @@ import itertools
 import keyboard
 from collections import Counter
 from collections import deque
+import mouse
 
 import cv2 as cv
 import numpy as np
@@ -22,8 +23,8 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--device", type=int, default=0)
-    parser.add_argument("--width", help='cap width', type=int, default=960)
-    parser.add_argument("--height", help='cap height', type=int, default=540)
+    parser.add_argument("--width", help='cap width', type=int, default=1920)
+    parser.add_argument("--height", help='cap height', type=int, default=1080)
 
     parser.add_argument('--use_static_image_mode', action='store_true')
     parser.add_argument("--min_detection_confidence",
@@ -145,6 +146,7 @@ def main():
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
                 if hand_sign_id == 2:  # Point gesture
                     point_history.append(landmark_list[8])
+                    mouse.move(landmark_list[8][0], landmark_list[8][1], absolute=True, duration=0.1)
                 else:
                     point_history.append([0, 0])
 
