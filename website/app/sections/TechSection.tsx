@@ -6,8 +6,8 @@ const TechSection = () => {
     <section className="min-h-screen pb">
       <h2 className="text-center pb-8">tech stack</h2>
       <div className="grid mx-auto grid-cols-2 w-fit gap-12 pb-48">
-        <div className="flex flex-col gap-12 items-center">
-          <h3 className="text-5xl font-display text-center">banana app</h3>
+        <div className="flex flex-col gap- items-center">
+          <h4 className="text-4xl font-display text-center">banana blindness</h4>
           <div className="p-12 w-full">
             <div className="relative w-full aspect-square">
               <Image
@@ -43,10 +43,8 @@ const TechSection = () => {
           </div>
         </div>
         <div className="flex flex-col gap-12 items-center">
-          <h3 className="text-5xl font-display text-center">
-            demo site (this)
-          </h3>
-          <div className="p-12 w-full">
+        <h4 className="text-4xl font-display text-center">the frontend site</h4>
+          <div className="p-4 w-full">
           <div className="relative w-full aspect-video">
             <Image
               className="object-contain"
@@ -56,6 +54,7 @@ const TechSection = () => {
             />
           </div>
           </div>
+          <div className="p-4 w-full">
           <div className="relative w-full aspect-video">
             <Image
               className="object-contain"
@@ -64,6 +63,8 @@ const TechSection = () => {
               fill
             />
           </div>
+          </div>
+          <div className="p-4 w-full">
           <div className="relative w-full aspect-video">
             <Image
               className="object-contain"
@@ -72,6 +73,8 @@ const TechSection = () => {
               fill
             />
           </div>
+          </div>
+          <div className="p-4 w-full">
           <div className="relative w-full aspect-video">
             <Image
               className="object-contain"
@@ -80,6 +83,7 @@ const TechSection = () => {
               width={300}
               height={300}
             />
+          </div>
           </div>
         </div>
       </div>
