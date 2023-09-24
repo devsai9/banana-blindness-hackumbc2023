@@ -12,10 +12,10 @@ const WhySection = () => {
     <section className="h-screen w-screen flex flex-col items-center ">
       <h2 className="text-center pb-8">why banana blindness?</h2>
       {visible ? (
-        <p className="font-black text-8xl text-center">we&apos;re broke</p>
+        <p className="font-black text-8xl text-center mb-6">we&apos;re broke</p>
       ) : (
         <button
-          className="w-32 h-32 flex items-center justify-center"
+          className="w-32 h-32 flex items-center justify-center mb-6"
           onClick={() => setVisible(true)}
         >
           <motion.svg
