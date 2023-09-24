@@ -10,7 +10,9 @@ import WhySection from "./sections/WhySection";
 // slide up/down scroll
 // cursor move/click why reveal
 // r/l skip tech
-// TODO: cursor hacking?
+// close hand to stop watching
+// gui
+// TODO: cursor hacking
 const Home = () => {
   return (
     <main className="bg-yellow font-body">
