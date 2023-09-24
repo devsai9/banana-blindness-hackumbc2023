@@ -50,6 +50,14 @@ const TechSection = () => {
           <div className="relative w-full aspect-video">
             <Image
               className="object-contain"
+              src="/typescript.png"
+              alt="TypeScript"
+              fill
+            />
+          </div>
+          <div className="relative w-full aspect-video">
+            <Image
+              className="object-contain"
               src="/tailwindcss.png"
               alt="TailwindCSS"
               fill

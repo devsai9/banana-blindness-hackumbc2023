@@ -25,7 +25,10 @@ const ReviewsSection = () => {
   };
 
   return (
-    <section className="h-screen w-screen cursor-pointer select-none" onClick={handleClick}>
+    <section
+      className="h-screen w-screen cursor-pointer select-none"
+      onClick={handleClick}
+    >
       <p className="text-7xl text-center font-display pb-4">
         &ldquo;{reviews[pos].review}&rdquo;
       </p>
