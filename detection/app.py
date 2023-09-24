@@ -6,6 +6,7 @@ import keyboard
 from collections import Counter
 from collections import deque
 import mouse
+import time
 
 import cv2 as cv
 import numpy as np
@@ -90,6 +91,18 @@ def main():
     mode = 0
     handMotions = ["", ""]
     previousIndexY, previousMiddleY, previousIndexX = 0, 0, 0 
+    previousThumbX, previousThumbY = 0,0
+    previousWristX, previousWristY = 0,0
+    wristY = 0
+    wristX = 0
+    thumbX=0
+    thumbY=0
+    previouskey = ""
+    previousClick = False
+    currentClick = False
+    clickCounter = 0
+    scrollStarting = 0
+    previousScroll = 0
     while True:
         fps = cvFpsCalc.get()
         key = cv.waitKey(10)
@@ -129,16 +142,50 @@ def main():
                 middleFingerY = landmark_list[12][1] 
                 indexFingerX = landmark_list[8][0]
 
+                thumbX = landmark_list[4][0]
+                thumbY = landmark_list[4][1]
+
+               
+
+                if abs(indexFingerX - thumbX) < 40 and abs(indexFingerY - thumbY) < 40:
+                    currentClick=True
+                    if clickCounter<50:
+                        clickCounter+=1
+                else:
+                    currentClick=False
+                    clickCounter = 0
+                    scrollStarting = 0
+                    previousScroll = 0
+
+                
+                if previousClick != currentClick and currentClick:
+                    mouse.click(button='left')
+
+
+                if clickCounter>12:
+                    scrollStarting = (indexFingerY + thumbY)/2
+                    if clickCounter<14:
+                        previousScroll = scrollStarting
+                    mouse.wheel((scrollStarting - previousScroll)/35)
+
+                    
+
+                
+                previousClick = currentClick
+                previousScroll = scrollStarting
+                wristX = landmark_list[0][0]
+                wristY = landmark_list[0][1]
+
                 if abs(indexFingerX-previousIndexX)<3:
                     indexFingerX = previousIndexX
                 
                 if abs(indexFingerY-previousIndexY)<3:
                     indexFingerY = previousIndexY
-
+ 
                 if hand_sign_id == 2: 
-                    mouse.move(indexFingerX, indexFingerY, absolute=True)
+                    mouse.move(((indexFingerX+thumbX)/2)*1.25, ((indexFingerY+thumbY)/2)*1.25, absolute=True)
 
-                if indexFingerY<landmark_list[11][1] and landmark_list[10][1]<landmark_list[9][1]:
+                '''if indexFingerY<landmark_list[11][1] and landmark_list[10][1]<landmark_list[9][1]:
                     if middleFingerY<landmark_list[7][1] and landmark_list[7][1]<landmark_list[6][1]:
                         if landmark_list[4][1]>landmark_list[5][1] and landmark_list[16][1]>landmark_list[5][1] and landmark_list[20][1]>landmark_list[5][1]:
                             if abs(indexFingerY-middleFingerY)<130:
@@ -147,11 +194,9 @@ def main():
                                 scroll = currentAverage-previousAverage
                                 if scroll>10:
                                     scroll=scroll/40
-                                    mouse.wheel(delta=scroll)
-                                continue
-                previousIndexY=indexFingerY
-                previousMiddleY=middleFingerY
-                previousIndexX=indexFingerX
+                                    mouse.wheel(delta=scroll)'''
+                
+
 
                 finger_gesture_id = 0
                 point_history_len = len(pre_processed_point_history_list)
@@ -177,6 +222,8 @@ def main():
             point_history.append([0, 0])
 
         debug_image = draw_info(debug_image, fps, mode, number)
+        """cv.namedWindow('Hand Gesture Recognition', cv.WINDOW_NORMAL)
+        cv.setWindowProperty('Hand Gesture Recognition',cv.WND_PROP_FULLSCREEN,cv.WINDOW_FULLSCREEN)"""
         cv.imshow('Hand Gesture Recognition', debug_image)
 
     cap.release()
@@ -301,12 +348,10 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
         cv.putText(image, "Finger Gesture:" + finger_gesture_text, (10, 60),
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2,
                    cv.LINE_AA)  
-        if hand_sign_text == "Open" and previousHand == "Close":
+        """if hand_sign_text == "Open" and previousHand == "Close":
             keyboard.press_and_release("space")
-        elif hand_sign_text == "Open" and previousHand == "Pointer":
-            mouse.click(button='left')
-        """elif hand_sign_text == "Pointer" and previousHand == "Close":
-            keyboard.press_and_release('ctrl+w')"""
+        elif hand_sign_text == "Close" and previousHand == "Pointer":
+            mouse.click(button='left')"""
         handMotions.append(hand_sign_text)
     return image, previousHand 
 
