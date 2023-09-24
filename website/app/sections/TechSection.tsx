@@ -43,7 +43,7 @@ const TechSection = () => {
           </div>
         </div>
         <div className="flex flex-col gap-12 items-center">
-        <h4 className="text-4xl font-display text-center">the frontend site</h4>
+        <h4 className="text-4xl font-display text-center">demo site</h4>
           <div className="p-4 w-full">
           <div className="relative w-full aspect-video">
             <Image

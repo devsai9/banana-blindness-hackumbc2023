@@ -33,7 +33,6 @@ const ReviewsSection = () => {
         &ldquo;{reviews[pos].review}&rdquo;
       </p>
       <p className="text-6xl text-center font-display mb-24">{reviews[pos].origin}</p>
-      <a href="https://youtube.com/shorts" className="text-4xl underline hover:no-underline">YouTube Shorts</a>
     </section>
   );
 };
