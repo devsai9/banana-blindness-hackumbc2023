@@ -1,6 +1,6 @@
 import copy
 import itertools
-import keyboard #MIGHT DELETE LATER
+import keyboard
 import mouse
 import cv2 as cv
 import numpy as np
@@ -9,6 +9,7 @@ from utils import CvFpsCalc
 from model import KeyPointClassifier
 import pygame
 import pyautogui
+
 pyautogui.FAILSAFE = False
 
 pygame.mixer.init()
@@ -38,11 +39,22 @@ def main():
     run = True
     previousRun = True
     running = True
+    toggle_pressed = False
+    
     while True:
         fps = cvFpsCalc.get()
         key = cv.waitKey(1)
+        
         if key == 27:
             break
+
+        if keyboard.is_pressed('t'):
+            if not toggle_pressed:
+                running = not running
+                toggle_pressed = True
+        else:
+            toggle_pressed = False
+
         ret, image = cap.read()
         if not ret:
             break
@@ -101,7 +113,7 @@ def main():
                     if abs(indexFingerY - previousIndexY)<3:
                         indexFingerY = previousIndexY
                     
-                    if (abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30) and (abs(ringFingerX - thumbX) < 30 and abs(ringFingerY - thumbY) < 30):
+                    if (abs(middleFingerX - thumbX) < 30 and abs(middleFingerY - thumbY) < 30) and (abs(ringFingerX - thumbX) < 30 and abs(ringFingerY - thumbY) < 30) and (indexFingerY<ringFingerY) and (pinkyFingerY<ringFingerY):
                         pyautogui.press('volumedown')
                     
                     mouse.move(((indexFingerX+thumbX)/2)*2, ((indexFingerY+thumbY)/2)*2, absolute=True)
