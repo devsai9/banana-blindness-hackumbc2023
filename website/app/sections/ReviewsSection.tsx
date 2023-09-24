@@ -32,8 +32,8 @@ const ReviewsSection = () => {
       <p className="text-7xl text-center font-display pb-4">
         &ldquo;{reviews[pos].review}&rdquo;
       </p>
-      <p className="text-6xl text-center font-display mb-14">{reviews[pos].origin}</p>
-      <iframe src="https://games.poki.com/458768/8b32c0f4-2dcb-4fdd-bf8b-16df63b01532?tag=pg-v3.130.1&amp;site_id=3&amp;iso_lang=en&amp;country=US&amp;poki_url=https://poki.com/en/g/fruit-ninja" title="Fruit Ninja" width={700} height={400}></iframe>
+      <p className="text-6xl text-center font-display mb-24">{reviews[pos].origin}</p>
+      <a href="https://youtube.com/shorts" className="text-4xl underline hover:no-underline">YouTube Shorts</a>
     </section>
   );
 };
