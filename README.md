@@ -16,7 +16,7 @@ Here is a list of the available hand gestures:
 
 | Gesture |  #1   |  #2   |  #3   |  #4   | 
 | :-----: | :---: | :---: | :---: | :---: |
-| Seconds |  <img src="readme/cursor.jpg" width="250">  |  <img src="readme/click.jpg" width="250">  |  <img src="readme/rewind.jpg" width="250">  |  <img src="readme/forward.jpg" width="250">  |
+| Images |  <img src="readme/cursor.jpg" width="250">  |  <img src="readme/click.jpg" width="250">  |  <img src="readme/rewind.jpg" width="250">  |  <img src="readme/forward.jpg" width="250">  |
 
 # Links
 [Devpost](#)<br>
