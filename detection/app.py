@@ -1,28 +1,17 @@
-import csv
 import copy
-import argparse
 import itertools
-import keyboard
-from collections import Counter
-from collections import deque
+import keyboard #MIGHT DELETE LATER
 import mouse
-import time
-
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
-
 from utils import CvFpsCalc
 from model import KeyPointClassifier
-from model import PointHistoryClassifier
 
 def main():
-
     cap_device, cap_width, cap_height = 0, 1920, 1080
     min_detection_confidence, min_tracking_confidence = 0.7, 0.5
-
     use_brect = True
-
     cap = cv.VideoCapture(cap_device)
     cap.set(cv.CAP_PROP_FRAME_WIDTH, cap_width)
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
@@ -35,13 +24,7 @@ def main():
     )
 
     keypoint_classifier = KeyPointClassifier()
-    point_history_classifier = PointHistoryClassifier()
     cvFpsCalc = CvFpsCalc(buffer_len=10)
-
-    history_length = 16
-    point_history = deque(maxlen=history_length)
-
-    finger_gesture_history = deque(maxlen=history_length)
 
     previousIndexY, previousIndexX = 0, 0
     thumbX, thumbY = 0, 0
@@ -68,10 +51,7 @@ def main():
                 brect = calc_bounding_rect(debug_image, hand_landmarks)
                 landmark_list = calc_landmark_list(debug_image, hand_landmarks)
                 pre_processed_landmark_list = pre_process_landmark(landmark_list)
-                pre_processed_point_history_list = pre_process_point_history(debug_image, point_history)
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
-                if hand_sign_id == 2: point_history.append(landmark_list[8])
-                else: point_history.append([0, 0])
 
                 indexFingerY = landmark_list[8][1]
                 indexFingerX = landmark_list[8][0]
@@ -88,11 +68,11 @@ def main():
 
                 if previousClick != currentClick and currentClick: mouse.click(button='left')
 
-                if clickCounter>12:
+                if clickCounter>6:
                     scrollStarting = (indexFingerY + thumbY)/2
-                    if clickCounter<14: previousScroll = scrollStarting
+                    if clickCounter<9: previousScroll = scrollStarting
                     mouse.wheel((scrollStarting - previousScroll)/20)
-                    mouse.move(((indexFingerX + thumbX)/2)*1.25,scrollStarting*1.25)
+                   
 
                 previousClick = currentClick
                 previousScroll = scrollStarting
@@ -103,19 +83,10 @@ def main():
                 if abs(indexFingerY - previousIndexY)<3:
                     indexFingerY = previousIndexY
  
-                if hand_sign_id == 2: 
-                    mouse.move(((indexFingerX+thumbX)/2)*1.25, ((indexFingerY+thumbY)/2)*1.25, absolute=True)
-
-                finger_gesture_id = 0
-                point_history_len = len(pre_processed_point_history_list)
-                if point_history_len == (history_length * 2):
-                    finger_gesture_id = point_history_classifier(pre_processed_point_history_list)
-
-                finger_gesture_history.append(finger_gesture_id)
+                mouse.move(((indexFingerX+thumbX)/2)*1.25, ((indexFingerY+thumbY)/2)*1.25, absolute=True)
+                    
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
                 debug_image = draw_info_text(debug_image, brect)
-        else:
-            point_history.append([0, 0])
 
         debug_image = draw_info(debug_image, fps)
         cv.imshow('Hand Gesture Recognition', debug_image)
@@ -163,17 +134,6 @@ def pre_process_landmark(landmark_list):
 
     temp_landmark_list = list(map(normalize_, temp_landmark_list))
     return temp_landmark_list
-
-def pre_process_point_history(image, point_history):
-    image_width, image_height = image.shape[1], image.shape[0]
-    temp_point_history = copy.deepcopy(point_history)
-    base_x, base_y = 0, 0
-    for index, point in enumerate(temp_point_history):
-        if index == 0: base_x, base_y = point[0], point[1]
-        temp_point_history[index][0] = (temp_point_history[index][0] - base_x) / image_width
-        temp_point_history[index][1] = (temp_point_history[index][1] - base_y) / image_height
-    temp_point_history = list(itertools.chain.from_iterable(temp_point_history))
-    return temp_point_history
 
 def draw_bounding_rect(use_brect, image, brect):
     if use_brect: cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[3]), (0, 0, 0), 1)
