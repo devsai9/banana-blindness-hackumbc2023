@@ -8,7 +8,10 @@ import mediapipe as mp
 from utils import CvFpsCalc
 import pygame
 import pyautogui
-
+from ctypes import cast, POINTER
+from comtypes import CLSCTX_ALL
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+import math
 pyautogui.FAILSAFE = False
 
 pygame.mixer.init()
@@ -38,7 +41,12 @@ def main():
     toggle_pressed = False
     arrowCounter = 0
     mouseAction = "none"
+    volumeOn = False
     pressed = False
+    previousVolume = False
+    devices = AudioUtilities.GetSpeakers()
+    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+    volume = cast(interface, POINTER(IAudioEndpointVolume))
     while True:
         fps = cvFpsCalc.get()
         key = cv.waitKey(1)
@@ -70,14 +78,14 @@ def main():
                 landmark_list = calc_landmark_list(debug_image, hand_landmarks)
 
                 indexFingerX, indexFingerY = landmark_list[8]
-                ringFingerX, ringFingerY = landmark_list[12]
-                middleFingerX, middleFingerY = landmark_list[16]
-                pinkyFingerX, pinkyFingerY = landmark_list[20]
+                middleFingerX, middleFingerY = landmark_list[12]
+                ringFingerX,ringFingerY = landmark_list[16]
+                pinkyFingerX,pinkyFingerY = landmark_list[20]
                 thumbX, thumbY = landmark_list[4]
                 wristX, wristY = landmark_list[0]
 
                 # CLEAN LATER
-                """if ((abs(indexFingerX - thumbX) < 20 and abs(indexFingerY - thumbY) < 20) and (abs(ringFingerX - thumbX) < 20 and abs(ringFingerY - thumbY) < 20) and (abs(middleFingerX - thumbX) < 20 and abs(middleFingerY - thumbY) < 20) and (abs(pinkyFingerX - thumbX) < 20 and abs(pinkyFingerY - thumbY) < 20)):
+                """if ((abs(indexFingerX - thumbX) < 20 and abs(indexFingerY - thumbY) < 20) and (abs(middleFingerX - thumbX) < 20 and abs(middleFingerY - thumbY) < 20) and (abs(middleFingerX - thumbX) < 20 and abs(middleFingerY - thumbY) < 20) and (abs(pinkyFingerX - thumbX) < 20 and abs(pinkyFingerY - thumbY) < 20)):
                     run = not run
         
                 if run==False and previousRun!=run:
@@ -106,44 +114,51 @@ def main():
                     previousClick = currentClick
                     previousScroll = scrollStarting
                     if thumbY<wristY  and thumbY>landmark_list[6][1] and abs(landmark_list[6][1]-landmark_list[5][1])<40 and abs(landmark_list[10][1]-landmark_list[9][1])<40 and abs(landmark_list[14][1]-landmark_list[13][1])<40 and abs(landmark_list[17][1]-landmark_list[18][1])<40 and (indexFingerY>landmark_list[5][1]):
-
-
                         if thumbX>landmark_list[3][0] and landmark_list[2][0] >wristX:
-                            arrowChoice = "right"
                             arrowCounter +=1
-
-                            if arrowCounter>14:
+                            if arrowCounter>16:
                                 keyboard.press_and_release("right")
                                 arrowCounter=0
 
                         elif thumbX<landmark_list[3][0] and landmark_list[2][0] <wristX:
-                            arrowChoice = "left"
                             arrowCounter+=1
-
-                            if arrowCounter>14:
+                            if arrowCounter>16:
                                 keyboard.press_and_release("left")
                                 arrowCounter=0
-
                         else:
-                            arrowChoice = "none"
                             arrowCounter = 9
-
-
                     else: 
- 
-                        arrowChoice = "none"
                         arrowCounter = 9
 
-                    if abs(indexFingerX - previousIndexX)<3:
+                    '''if abs(indexFingerX - previousIndexX)<3:
                         indexFingerX = previousIndexX
                     
                     if abs(indexFingerY - previousIndexY)<3:
-                        indexFingerY = previousIndexY
+                        indexFingerY = previousIndexY'''
                     
-                    if (abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30) and (abs(ringFingerX - thumbX) < 30 and abs(ringFingerY - thumbY) < 30):
-                        pyautogui.press('volumedown')
-                    
+                    if (abs(ringFingerX - middleFingerX) < 30 and abs(ringFingerY - middleFingerY) < 30) and (pinkyFingerY<landmark_list[19][1]) and (indexFingerY<landmark_list[7][1]):
+                        volumeOn = True
+                        
+                    else:
+                        volumeOn=False
+
+                    if volumeOn == True and previousVolume!=volumeOn:
+
+                        volumeStarting = thumbY
+
+                    if volumeOn:
+
+                        if thumbY>volumeStarting+30:
+                            pyautogui.press("volumedown")
+                        if thumbY<volumeStarting-30:
+                            pyautogui.press("volumeup")
+                            
+
+                        
+                   
                     mouse.move(((indexFingerX+thumbX)/2)*2, ((indexFingerY+thumbY)/2)*2, absolute=True)
+
+                    previousVolume=volumeOn
                     
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
                 debug_image = draw_info_text(debug_image, brect)
