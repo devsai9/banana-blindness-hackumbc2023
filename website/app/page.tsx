@@ -2,6 +2,7 @@
 
 import Footer from "./components/Footer";
 import FrontSection from "./sections/FrontSection";
+import PriceSection from "./sections/PriceSection";
 import ReviewsSection from "./sections/ReviewsSection";
 import TechSection from "./sections/TechSection";
 import WhySection from "./sections/WhySection";
@@ -20,6 +21,7 @@ const Home = () => {
       <WhySection />
       <TechSection />
       <ReviewsSection />
+      <PriceSection />
       <Footer />
     </main>
   );
