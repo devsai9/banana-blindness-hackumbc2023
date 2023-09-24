@@ -6,7 +6,118 @@ import cv2 as cv
 import numpy as np
 import mediapipe as mp
 from utils import CvFpsCalc
+import pygame
 import pyautogui
+
+pyautogui.FAILSAFE = False
+
+pygame.mixer.init()
+
+
+
+def ArraytoHandMap(landmark_list):
+
+
+    thumb = {
+        'one':{'x':landmark_list[1][0], 'y':landmark_list[1][1]},
+        'two':{'x':landmark_list[2][0], 'y':landmark_list[2][1]},
+        'three':{'x':landmark_list[3][0], 'y':landmark_list[3][1]},
+        'four':{'x':landmark_list[4][0], 'y':landmark_list[4][1]},
+    }
+    index = {
+        'one':{'x':landmark_list[5][0], 'y':landmark_list[5][1]},
+        'two':{'x':landmark_list[6][0], 'y':landmark_list[6][1]},
+        'three':{'x':landmark_list[7][0], 'y':landmark_list[7][1]},
+        'four':{'x':landmark_list[8][0], 'y':landmark_list[8][1]},
+    }
+
+    middle ={
+        'one':{'x':landmark_list[9][0], 'y':landmark_list[9][1]},
+        'two':{'x':landmark_list[10][0], 'y':landmark_list[10][1]},
+        'three':{'x':landmark_list[11][0], 'y':landmark_list[11][1]},
+        'four':{'x':landmark_list[12][0], 'y':landmark_list[12][1]},
+    }
+    ring = {
+        'one':{'x':landmark_list[13][0], 'y':landmark_list[13][1]},
+        'two':{'x':landmark_list[14][0], 'y':landmark_list[14][1]},
+        'three':{'x':landmark_list[15][0], 'y':landmark_list[15][1]},
+        'four':{'x':landmark_list[16][0], 'y':landmark_list[16][1]},
+    }
+    pinky = {
+        'one':{'x':landmark_list[17][0], 'y':landmark_list[17][1]},
+        'two':{'x':landmark_list[18][0], 'y':landmark_list[18][1]},
+        'three':{'x':landmark_list[19][0], 'y':landmark_list[19][1]},
+        'four':{'x':landmark_list[20][0], 'y':landmark_list[20][1]},
+    }
+    wrist = {
+        'one':{'x':landmark_list[0][0],'y':landmark_list[0][1]}
+    }
+
+    hand = {'thumb':thumb,'index':index,'middle':middle,'ring':ring,'pinky':pinky, 'wrist':wrist}
+
+    return hand
+
+
+def currentCursorMode(handMap):
+
+    errVar = 40
+
+    currentCursor = "none"
+
+    if abs(handMap['thumb']['four']['x'] - handMap['index']['four']['x'])<errVar and abs(handMap['index']['four']['y'] - handMap['thumb']['four']['y'])<errVar:
+
+        if handMap['ring']['four']['y']>handMap['thumb']['three']['y'] and handMap['pinky']['four']['y']>handMap['thumb']['three']['y']:
+
+            if handMap['middle']['four']['y']>handMap['thumb']['three']['y']:
+                currentCursor = "pointer"
+
+            elif handMap['middle']['four']['y']<handMap['thumb']['three']['y']:
+                currentCursor = "drag"
+
+
+    elif handMap['thumb']['four']['y'] < handMap['wrist']['one']['y'] and handMap['thumb']['four']['y']>handMap['index']['two']['y']:
+
+        if handMap['index']['four']['y']>handMap['thumb']['three']['y'] and handMap['pinky']['four']['y']>handMap['thumb']['three']['y']:
+            if handMap['middle']['four']['y']>handMap['thumb']['three']['y'] and handMap['ring']['four']['y']>handMap['thumb']['three']['y']:
+                
+                    
+
+                        if handMap['thumb']['four']['x']>handMap['thumb']['three']['x'] and handMap['thumb']['two']['x']>handMap['wrist']['one']['x']:
+
+                            currentCursor = "rightarrow"
+
+                        elif handMap['thumb']['four']['x']<handMap['thumb']['three']['x'] and handMap['thumb']['two']['x']<handMap['wrist']['one']['x']:
+
+                            currentCursor = "leftarrow"
+
+    elif (abs(handMap['middle']['four']['x'] - handMap['thumb']['four']['x']) < errVar and abs(handMap['middle']['four']['y'] - handMap['thumb']['four']['y']) < errVar):
+
+         if (abs(handMap['ring']['four']['x'] - handMap['thumb']['four']['x']) < errVar and abs(handMap['ring']['four']['y'] - handMap['thumb']['four']['y']) < errVar):
+
+            if(abs(handMap['index']['four']['y'] < handMap['middle']['four']['y']) and abs(handMap['pinky']['four']['y']< handMap['ring']['four']['y']) ):
+                currentCursor='volume'
+
+    elif handMap['ring']['four']['y']<handMap['index']['two']['y'] and handMap['pinky']['four']['y']<handMap['index']['two']['y']:
+        currentCursor="cursor"
+
+    else:
+        currentCursor="none"
+
+                        
+                        
+
+        
+
+        
+        
+        
+       
+    return currentCursor
+    
+
+
+
+
 
 def main():
     cap_device, cap_width, cap_height = 0, 1920, 1080
@@ -23,17 +134,18 @@ def main():
         min_tracking_confidence=min_tracking_confidence,
     )
 
-    cvFpsCalc = CvFpsCalc(buffer_len=10)
+    cvFpsCalc = CvFpsCalc(buffer_len=12)
 
-    thumbX, thumbY = 0, 0
+    previousIndexY, previousIndexX = 0, 0
+    
     previousClick, currentClick = False, False
     clickCounter, scrollStarting, previousScroll,scrollCounter = 0, 0, 0,0
     running = True
     toggle_pressed = False
     arrowCounter = 0
-    volumeOn = False
-    previousVolume = False
-
+    previousCursor = ""
+   
+    pressed = False
     while True:
         fps = cvFpsCalc.get()
         key = cv.waitKey(1)
@@ -64,15 +176,32 @@ def main():
                 brect = calc_bounding_rect(debug_image, hand_landmarks)
                 landmark_list = calc_landmark_list(debug_image, hand_landmarks)
 
-                indexFingerX, indexFingerY = landmark_list[8]
-                middleFingerX, middleFingerY = landmark_list[12]
-                ringFingerX, ringFingerY = landmark_list[16]
-                pinkyFingerX, pinkyFingerY = landmark_list[20]
-                thumbX, thumbY = landmark_list[4]
-                wristX, wristY = landmark_list[0]
+                handMap = ArraytoHandMap(landmark_list)
+
+
+
+               
+
+               
+                currentCursor = ""
+                previousVolume = False
+                volumeOn = False
+                # CLEAN LATER
+                """if ((abs(handMap['index']['four']['x'] - handMap['thumb']['four']['x']) < 20 and abs(handMap['index']['four']['y'] - handMap['thumb']['four']['y']) < 20) and (abs(ringFingerX - handMap['thumb']['four']['x']) < 20 and abs(ringFingerY - handMap['thumb']['four']['y']) < 20) and (abs(middleFingerX - handMap['thumb']['four']['x']) < 20 and abs(middleFingerY - handMap['thumb']['four']['y']) < 20) and (abs(pinkyFingerX - handMap['thumb']['four']['x']) < 20 and abs(pinkyFingerY - handMap['thumb']['four']['y']) < 20)):
+                    run = not run
+        
+                if run==False and previousRun!=run:
+                    running = not running
+                    pygame.mixer.Sound('./assets/ding.wav').play()
+
+
+                previousRun = run"""
 
                 if running:
-                    if abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30:
+                  
+                    currentCursor = currentCursorMode(handMap)
+                    #print(currentCursor)
+                    if currentCursor == "pointer":
                         currentClick=True
                         if clickCounter<50:
                             clickCounter+=1
@@ -83,45 +212,74 @@ def main():
                     if previousClick != currentClick and currentClick: mouse.click(button='left')
 
                     if clickCounter>6:
-                        scrollStarting = (indexFingerY + thumbY)/2
+                        scrollStarting = (handMap['index']['four']['y'] + handMap['thumb']['four']['y'])/2
                         if clickCounter<9: previousScroll = scrollStarting
                         mouse.wheel((scrollStarting - previousScroll)/20)
                     
                     previousClick = currentClick
                     previousScroll = scrollStarting
-                    if thumbY<wristY and thumbY>landmark_list[6][1] and abs(landmark_list[6][1]-landmark_list[5][1])<40 and abs(landmark_list[10][1]-landmark_list[9][1])<40 and abs(landmark_list[14][1]-landmark_list[13][1])<40 and abs(landmark_list[17][1]-landmark_list[18][1])<40 and (indexFingerY>landmark_list[5][1]):
-                        if thumbX>landmark_list[3][0] and landmark_list[2][0] >wristX:
-                            arrowCounter +=1
-                            if arrowCounter>16:
-                                keyboard.press_and_release("right")
-                                arrowCounter=0
 
-                        elif thumbX<landmark_list[3][0] and landmark_list[2][0] <wristX:
-                            arrowCounter+=1
-                            if arrowCounter>16:
-                                keyboard.press_and_release("left")
-                                arrowCounter=0
-                        else:
-                            arrowCounter = 9
-                    else: 
-                        arrowCounter = 9  
+                    if currentCursor == "drag" and previousCursor!="drag":
 
-                    if (abs(ringFingerX - middleFingerX) < 30 and abs(ringFingerY - middleFingerY) < 30) and (pinkyFingerY<landmark_list[19][1]) and (indexFingerY<landmark_list[7][1]):
+                       mouse.press()
+
+                    if previousCursor=="drag" and currentCursor!="drag":
+                        mouse.release(button='left')
+
+                    
+                    
+                    
+                    if currentCursor=="rightarrow":
+                        arrowCounter+=1
+
+                        if arrowCounter>14:
+                            keyboard.press_and_release("right")
+                            arrowCounter=0
+
+                    elif currentCursor =="leftarrow":
+                        arrowCounter+=1
+                        if arrowCounter>14:
+                            keyboard.press_and_release("left")
+                            arrowCounter=0
+
+                    if currentCursor!='leftarrow' and currentCursor!="rightarrow":
+                        arrowCounter=9
+
+                  
+
+               
+
+
+
+                    
+
+        
+
+                    if abs(handMap['index']['four']['x'] - previousIndexX)<6:
+                        handMap['index']['four']['x'] = previousIndexX
+                    
+                    if abs(handMap['index']['four']['y'] - previousIndexY)<6:
+                        handMap['index']['four']['y'] = previousIndexY
+                    
+                    if currentCursor=='volume':
                         volumeOn = True
                     else:
                         volumeOn=False
 
                     if volumeOn == True and previousVolume!=volumeOn:
-                        volumeStarting = thumbY
+                        volumeStarting = handMap['thumb']['four']['y']
 
-                    if volumeOn:
-                        if thumbY>volumeStarting+30:
-                            pyautogui.press("volumedown")
-                        if thumbY<volumeStarting-30:
-                            pyautogui.press("volumeup")
-                            
-                    mouse.move(((indexFingerX+thumbX)/2)*2, ((indexFingerY+thumbY)/2)*2, absolute=True)
-                    previousVolume=volumeOn
+                    '''if volumeOn:
+                        if handMap['thumb']['four']['y']>volumeStarting+30:
+                            keyboard.press("volumedown")
+                        if handMap['thumb']['four']['y']<volumeStarting-30:
+                            keyboard.press("fn+f2")'''
+
+                    previousVolume = volumeOn
+                    previousCursor=currentCursor
+                    
+                    
+                    mouse.move(((handMap['index']['four']['x']+handMap['thumb']['four']['x'])/2)*2, ((handMap['index']['four']['y']+handMap['thumb']['four']['y'])/2)*2, absolute=True)
                     
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
                 debug_image = draw_info_text(debug_image, brect)
@@ -179,7 +337,7 @@ def draw_bounding_rect(use_brect, image, brect):
 
 def draw_info_text(image, brect):
     cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[1] - 22), (0, 0, 0), -1)
-    cv.putText(image, "Bounding Box", (brect[0] + 5, brect[1] - 4), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
+    cv.putText(image, "PLACEHOLDER", (brect[0] + 5, brect[1] - 4), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
     return image
 
 def draw_info(image, fps):
