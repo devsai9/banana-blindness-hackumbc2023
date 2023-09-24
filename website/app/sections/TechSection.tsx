@@ -3,9 +3,59 @@ import Image from "next/image";
 // thumb skip r/l
 const TechSection = () => {
   return (
-    <section className="h-screen w-screen">
+    <section className="min-h-screen w-screen pb">
       <h2 className="text-center pb-8">tech stack</h2>
-      <div className="grid mx-auto grid-cols-2 w-fit gap-12">
+      <div className="grid mx-auto grid-cols-2 w-fit gap-12 pb-48">
+        <div className="flex flex-col gap-12 items-center">
+          <h3 className="text-5xl font-display text-center">banana app</h3>
+          <div className="p-12 w-full">
+            <div className="relative w-full aspect-square">
+              <Image
+                className="object-contain"
+                src="/python.png"
+                alt="Python"
+                fill
+              />
+            </div>
+          </div>
+          <div className="relative w-full aspect-square">
+            <Image
+              className="object-contain"
+              src="/opencv.png"
+              alt="OpenCV"
+              fill
+            />
+          </div>
+          <div className="relative w-full aspect-video">
+            <Image
+              className="object-contain"
+              src="/tensorflow.png"
+              alt="TensorFlow"
+              fill
+            />
+          </div>
+        </div>
+        <div className="flex flex-col gap-12 items-center">
+          <h3 className="text-5xl font-display text-center">
+            demo site (this)
+          </h3>
+          <div className="relative w-full aspect-video">
+            <Image
+              className="object-contain"
+              src="/nextjs.png"
+              alt="Next.js"
+              fill
+            />
+          </div>
+          <div className="relative w-full aspect-video">
+            <Image
+              className="object-contain"
+              src="/tailwindcss.png"
+              alt="TailwindCSS"
+              fill
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
