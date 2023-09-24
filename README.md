@@ -12,12 +12,11 @@ Here is a list of the available hand gestures:
 <img src="readme/cursor.jpg" width="250">
 - Tap your index finger and thumb for left click<br>
 <img src="readme/click.jpg" width="250">
-- Tap your index finder and thumb, keep them closed, and move your hand up and down to scroll<br>
-<img src="readme/scroll.gif" width="250">
 - Fold your hand into a thumbs-up and turn it left 90 degrees (like the image below) to rewind video by 5 seconds<br>
 <img src="readme/rewind.jpg" width="250">
 - Fold your hand into a thumbs-up and turn it right 90 degrees (like the image below) to forward video by 5 seconds<br>
 <img src="readme/forward.jpg" width="250">
+- Tap your index finder and thumb, keep them closed, and move your hand up and down to scroll!<br>
 
 # Links
 [Devpost](#)<br>
