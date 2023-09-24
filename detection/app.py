@@ -74,48 +74,34 @@ def main():
                 middleFingerX, middleFingerY = landmark_list[16]
                 pinkyFingerX, pinkyFingerY = landmark_list[20]
                 thumbX, thumbY = landmark_list[4]
+                wristX, wristY = landmark_list[0]
 
-                wristX = landmark_list[0][0]
-                wristY = landmark_list[0][1]
+                # CLEAN LATER
+                """if ((abs(indexFingerX - thumbX) < 20 and abs(indexFingerY - thumbY) < 20) and (abs(ringFingerX - thumbX) < 20 and abs(ringFingerY - thumbY) < 20) and (abs(middleFingerX - thumbX) < 20 and abs(middleFingerY - thumbY) < 20) and (abs(pinkyFingerX - thumbX) < 20 and abs(pinkyFingerY - thumbY) < 20)):
+                    run = not run
+        
+                if run==False and previousRun!=run:
+                    running = not running
+                    pygame.mixer.Sound('./assets/ding.wav').play()
+
+
+                previousRun = run"""
 
                 if running:
-                    if (abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30) and landmark_list[12][1]>landmark_list[9][1]:
+                    if abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30:
                         currentClick=True
-                        
-                        if clickCounter<60:
+                        if clickCounter<50:
                             clickCounter+=1
-
-                        scrollCounter = 0
-
-                    elif (abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30) and landmark_list[12][1]<landmark_list[15][1]:
-                        currentClick=False
-                        mouse.release()
-                        clickCounter = 0
-                        if scrollCounter<60:
-                            scrollCounter+=1
-                        pressed =False
                     else:
                         currentClick=False
-                       
-                        scrollCounter,clickCounter, scrollStarting, previousScroll = 0, 0, 0, 0
-                        pressed=False
+                        clickCounter, scrollStarting, previousScroll = 0, 0, 0
 
+                    if previousClick != currentClick and currentClick: mouse.click(button='left')
 
-
-                    if previousClick != currentClick and not currentClick: 
-                        if clickCounter<8:
-                            mouse.click(button='left')
-                        mouse.release()
-                        pressed=False
-
-                    if clickCounter>8 and currentClick and pressed==False:
-                        mouse.press()
-                        pressed = True
-                    if scrollCounter>6:
+                    if clickCounter>6:
                         scrollStarting = (indexFingerY + thumbY)/2
-                        if scrollCounter<9: previousScroll = scrollStarting
+                        if clickCounter<9: previousScroll = scrollStarting
                         mouse.wheel((scrollStarting - previousScroll)/20)
-
                     
                     previousClick = currentClick
                     previousScroll = scrollStarting
@@ -148,16 +134,13 @@ def main():
                         arrowChoice = "none"
                         arrowCounter = 9
 
-                    previousClick = currentClick
-                    previousScroll = scrollStarting
-
                     if abs(indexFingerX - previousIndexX)<3:
                         indexFingerX = previousIndexX
                     
                     if abs(indexFingerY - previousIndexY)<3:
                         indexFingerY = previousIndexY
                     
-                    if (abs(middleFingerX - thumbX) < 30 and abs(middleFingerY - thumbY) < 30) and (abs(ringFingerX - thumbX) < 30 and abs(ringFingerY - thumbY) < 30) and (indexFingerY<ringFingerY) and (pinkyFingerY<ringFingerY):
+                    if (abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30) and (abs(ringFingerX - thumbX) < 30 and abs(ringFingerY - thumbY) < 30):
                         pyautogui.press('volumedown')
                     
                     mouse.move(((indexFingerX+thumbX)/2)*2, ((indexFingerY+thumbY)/2)*2, absolute=True)
