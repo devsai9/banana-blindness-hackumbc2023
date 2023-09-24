@@ -6,7 +6,6 @@ import cv2 as cv
 import numpy as np
 import mediapipe as mp
 from utils import CvFpsCalc
-from model import KeyPointClassifier
 import pygame
 import pyautogui
 
@@ -29,18 +28,17 @@ def main():
         min_tracking_confidence=min_tracking_confidence,
     )
 
-    keypoint_classifier = KeyPointClassifier()
     cvFpsCalc = CvFpsCalc(buffer_len=10)
 
     previousIndexY, previousIndexX = 0, 0
     thumbX, thumbY = 0, 0
     previousClick, currentClick = False, False
-    clickCounter, scrollStarting, previousScroll = 0, 0, 0
-    run = True
-    previousRun = True
+    clickCounter, scrollStarting, previousScroll,scrollCounter = 0, 0, 0,0
     running = True
     toggle_pressed = False
-    
+    arrowCounter = 0
+    mouseAction = "none"
+    pressed = False
     while True:
         fps = cvFpsCalc.get()
         key = cv.waitKey(1)
@@ -77,33 +75,79 @@ def main():
                 pinkyFingerX, pinkyFingerY = landmark_list[20]
                 thumbX, thumbY = landmark_list[4]
 
-                # CLEAN LATER
-                """if ((abs(indexFingerX - thumbX) < 20 and abs(indexFingerY - thumbY) < 20) and (abs(ringFingerX - thumbX) < 20 and abs(ringFingerY - thumbY) < 20) and (abs(middleFingerX - thumbX) < 20 and abs(middleFingerY - thumbY) < 20) and (abs(pinkyFingerX - thumbX) < 20 and abs(pinkyFingerY - thumbY) < 20)):
-                    run = not run
-        
-                if run==False and previousRun!=run:
-                    running = not running
-                    pygame.mixer.Sound('./assets/ding.wav').play()
-
-
-                previousRun = run"""
+                wristX = landmark_list[0][0]
+                wristY = landmark_list[0][1]
 
                 if running:
-                    if abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30:
+                    if (abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30) and landmark_list[12][1]>landmark_list[9][1]:
                         currentClick=True
-                        if clickCounter<50:
+                        
+                        if clickCounter<60:
                             clickCounter+=1
+
+                        scrollCounter = 0
+
+                    elif (abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30) and landmark_list[12][1]<landmark_list[15][1]:
+                        currentClick=False
+                        mouse.release()
+                        clickCounter = 0
+                        if scrollCounter<60:
+                            scrollCounter+=1
+                        pressed =False
                     else:
                         currentClick=False
-                        clickCounter, scrollStarting, previousScroll = 0, 0, 0
+                       
+                        scrollCounter,clickCounter, scrollStarting, previousScroll = 0, 0, 0, 0
+                        pressed=False
 
-                    if previousClick != currentClick and currentClick: mouse.click(button='left')
 
-                    if clickCounter>6:
+
+                    if previousClick != currentClick and not currentClick: 
+                        if clickCounter<8:
+                            mouse.click(button='left')
+                        mouse.release()
+                        pressed=False
+
+                    if clickCounter>8 and currentClick and pressed==False:
+                        mouse.press()
+                        pressed = True
+                    if scrollCounter>6:
                         scrollStarting = (indexFingerY + thumbY)/2
-                        if clickCounter<9: previousScroll = scrollStarting
+                        if scrollCounter<9: previousScroll = scrollStarting
                         mouse.wheel((scrollStarting - previousScroll)/20)
+
                     
+                    previousClick = currentClick
+                    previousScroll = scrollStarting
+                    if thumbY<wristY  and thumbY>landmark_list[6][1] and abs(landmark_list[6][1]-landmark_list[5][1])<40 and abs(landmark_list[10][1]-landmark_list[9][1])<40 and abs(landmark_list[14][1]-landmark_list[13][1])<40 and abs(landmark_list[17][1]-landmark_list[18][1])<40 and (indexFingerY>landmark_list[5][1]):
+
+
+                        if thumbX>landmark_list[3][0] and landmark_list[2][0] >wristX:
+                            arrowChoice = "right"
+                            arrowCounter +=1
+
+                            if arrowCounter>14:
+                                keyboard.press_and_release("right")
+                                arrowCounter=0
+
+                        elif thumbX<landmark_list[3][0] and landmark_list[2][0] <wristX:
+                            arrowChoice = "left"
+                            arrowCounter+=1
+
+                            if arrowCounter>14:
+                                keyboard.press_and_release("left")
+                                arrowCounter=0
+
+                        else:
+                            arrowChoice = "none"
+                            arrowCounter = 9
+
+
+                    else: 
+ 
+                        arrowChoice = "none"
+                        arrowCounter = 9
+
                     previousClick = currentClick
                     previousScroll = scrollStarting
 
