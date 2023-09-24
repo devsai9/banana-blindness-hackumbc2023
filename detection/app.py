@@ -7,6 +7,11 @@ import numpy as np
 import mediapipe as mp
 from utils import CvFpsCalc
 from model import KeyPointClassifier
+import pygame
+import pyautogui
+pyautogui.FAILSAFE = False
+
+pygame.mixer.init()
 
 def main():
     cap_device, cap_width, cap_height = 0, 1920, 1080
@@ -30,6 +35,9 @@ def main():
     thumbX, thumbY = 0, 0
     previousClick, currentClick = False, False
     clickCounter, scrollStarting, previousScroll = 0, 0, 0
+    run = True
+    previousRun = True
+    running = True
     while True:
         fps = cvFpsCalc.get()
         key = cv.waitKey(1)
@@ -50,40 +58,53 @@ def main():
             for hand_landmarks, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
                 brect = calc_bounding_rect(debug_image, hand_landmarks)
                 landmark_list = calc_landmark_list(debug_image, hand_landmarks)
-                pre_processed_landmark_list = pre_process_landmark(landmark_list)
-                hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
 
-                indexFingerY = landmark_list[8][1]
-                indexFingerX = landmark_list[8][0]
-                thumbX = landmark_list[4][0]
-                thumbY = landmark_list[4][1]
+                indexFingerX, indexFingerY = landmark_list[8]
+                ringFingerX, ringFingerY = landmark_list[12]
+                middleFingerX, middleFingerY = landmark_list[16]
+                pinkyFingerX, pinkyFingerY = landmark_list[20]
+                thumbX, thumbY = landmark_list[4]
 
-                if abs(indexFingerX - thumbX) < 40 and abs(indexFingerY - thumbY) < 40:
-                    currentClick=True
-                    if clickCounter<50:
-                        clickCounter+=1
-                else:
-                    currentClick=False
-                    clickCounter, scrollStarting, previousScroll = 0, 0, 0
+                # CLEAN LATER
+                """if ((abs(indexFingerX - thumbX) < 20 and abs(indexFingerY - thumbY) < 20) and (abs(ringFingerX - thumbX) < 20 and abs(ringFingerY - thumbY) < 20) and (abs(middleFingerX - thumbX) < 20 and abs(middleFingerY - thumbY) < 20) and (abs(pinkyFingerX - thumbX) < 20 and abs(pinkyFingerY - thumbY) < 20)):
+                    run = not run
+        
+                if run==False and previousRun!=run:
+                    running = not running
+                    pygame.mixer.Sound('./assets/ding.wav').play()
 
-                if previousClick != currentClick and currentClick: mouse.click(button='left')
 
-                if clickCounter>6:
-                    scrollStarting = (indexFingerY + thumbY)/2
-                    if clickCounter<9: previousScroll = scrollStarting
-                    mouse.wheel((scrollStarting - previousScroll)/20)
-                   
+                previousRun = run"""
 
-                previousClick = currentClick
-                previousScroll = scrollStarting
+                if running:
+                    if abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30:
+                        currentClick=True
+                        if clickCounter<50:
+                            clickCounter+=1
+                    else:
+                        currentClick=False
+                        clickCounter, scrollStarting, previousScroll = 0, 0, 0
 
-                if abs(indexFingerX - previousIndexX)<3:
-                    indexFingerX = previousIndexX
-                
-                if abs(indexFingerY - previousIndexY)<3:
-                    indexFingerY = previousIndexY
- 
-                mouse.move(((indexFingerX+thumbX)/2)*1.25, ((indexFingerY+thumbY)/2)*1.25, absolute=True)
+                    if previousClick != currentClick and currentClick: mouse.click(button='left')
+
+                    if clickCounter>6:
+                        scrollStarting = (indexFingerY + thumbY)/2
+                        if clickCounter<9: previousScroll = scrollStarting
+                        mouse.wheel((scrollStarting - previousScroll)/20)
+                    
+                    previousClick = currentClick
+                    previousScroll = scrollStarting
+
+                    if abs(indexFingerX - previousIndexX)<3:
+                        indexFingerX = previousIndexX
+                    
+                    if abs(indexFingerY - previousIndexY)<3:
+                        indexFingerY = previousIndexY
+                    
+                    if (abs(indexFingerX - thumbX) < 30 and abs(indexFingerY - thumbY) < 30) and (abs(ringFingerX - thumbX) < 30 and abs(ringFingerY - thumbY) < 30):
+                        pyautogui.press('volumedown')
+                    
+                    mouse.move(((indexFingerX+thumbX)/2)*2, ((indexFingerY+thumbY)/2)*2, absolute=True)
                     
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
                 debug_image = draw_info_text(debug_image, brect)
@@ -106,7 +127,7 @@ def calc_bounding_rect(image, landmarks):
 
     x, y, w, h = cv.boundingRect(landmark_array)
     return [x, y, x + w, y + h]
-
+    
 def calc_landmark_list(image, landmarks):
     image_width, image_height = image.shape[1], image.shape[0]
     landmark_point = []
