@@ -64,20 +64,6 @@ def main():
 
     keypoint_classifier = KeyPointClassifier()
     point_history_classifier = PointHistoryClassifier()
-    with open('model/keypoint_classifier/keypoint_classifier_label.csv',
-              encoding='utf-8-sig') as f:
-        keypoint_classifier_labels = csv.reader(f)
-        keypoint_classifier_labels = [
-            row[0] for row in keypoint_classifier_labels
-        ]
-    with open(
-            'model/point_history_classifier/point_history_classifier_label.csv',
-            encoding='utf-8-sig') as f:
-        point_history_classifier_labels = csv.reader(f)
-        point_history_classifier_labels = [
-            row[0] for row in point_history_classifier_labels
-        ]
-
     cvFpsCalc = CvFpsCalc(buffer_len=10)
 
     history_length = 16
@@ -86,15 +72,9 @@ def main():
     finger_gesture_history = deque(maxlen=history_length)
 
     mode = 0
-    handMotions = ["", ""]
-    previousIndexY, previousMiddleY, previousIndexX = 0, 0, 0 
-    previousThumbX, previousThumbY = 0,0
-    previousWristX, previousWristY = 0,0
-    wristY = 0
-    wristX = 0
+    previousIndexY, previousIndexX = 0, 0
     thumbX=0
     thumbY=0
-    previouskey = ""
     previousClick = False
     currentClick = False
     clickCounter = 0
@@ -132,8 +112,6 @@ def main():
                     landmark_list)
                 pre_processed_point_history_list = pre_process_point_history(
                     debug_image, point_history)
-                logging_csv(number, mode, pre_processed_landmark_list,
-                            pre_processed_point_history_list)
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
                 if hand_sign_id == 2:
                     point_history.append(landmark_list[8])
@@ -169,8 +147,6 @@ def main():
 
                 previousClick = currentClick
                 previousScroll = scrollStarting
-                wristX = landmark_list[0][0]
-                wristY = landmark_list[0][1]
 
                 if abs(indexFingerX-previousIndexX)<3:
                     indexFingerX = previousIndexX
@@ -192,14 +168,10 @@ def main():
                     finger_gesture_history).most_common()
 
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
-                debug_image, previousHand = draw_info_text(
+                debug_image = draw_info_text(
                     debug_image,
                     brect,
                     handedness,
-                    keypoint_classifier_labels[hand_sign_id],
-                    point_history_classifier_labels[most_common_fg_id[0][0]],
-                    handMotions,
-                    point_history,
                 )
         else:
             point_history.append([0, 0])
@@ -282,48 +254,19 @@ def pre_process_point_history(image, point_history):
 
     return temp_point_history
 
-def logging_csv(number, mode, landmark_list, point_history_list):
-    if mode == 0:
-        pass
-    if mode == 1 and (0 <= number <= 9):
-        csv_path = 'model/keypoint_classifier/keypoint.csv'
-        with open(csv_path, 'a', newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow([number, *landmark_list])
-    if mode == 2 and (0 <= number <= 9):
-        csv_path = 'model/point_history_classifier/point_history.csv'
-        with open(csv_path, 'a', newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow([number, *point_history_list])
-    return
-
 def draw_bounding_rect(use_brect, image, brect):
     if use_brect:
         cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[3]),
                      (0, 0, 0), 1)
     return image
 
-def draw_info_text(image, brect, handedness, hand_sign_text,
-                   finger_gesture_text, handMotions, point_history):
+def draw_info_text(image, brect, handedness):
     cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[1] - 22),
                  (0, 0, 0), -1)
-
-    previousHand = handMotions[-1]
-    previousPreviousHand = handMotions[-2]
     info_text = handedness.classification[0].label[0:]
-    if hand_sign_text != "":
-        info_text = info_text + ':' + hand_sign_text
-    cv.putText(image, info_text, (brect[0] + 5, brect[1] - 4),
+    cv.putText(image, "PLACEHOLDER", (brect[0] + 5, brect[1] - 4),
                cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
-
-    if finger_gesture_text != "":
-        cv.putText(image, "Finger Gesture:" + finger_gesture_text, (10, 60),
-                   cv.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0), 4, cv.LINE_AA)
-        cv.putText(image, "Finger Gesture:" + finger_gesture_text, (10, 60),
-                   cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2,
-                   cv.LINE_AA)
-        handMotions.append(hand_sign_text)
-    return image, previousHand 
+    return image
 
 def draw_info(image, fps, mode, number):
     cv.putText(image, "FPS:" + str(fps), (10, 30), cv.FONT_HERSHEY_SIMPLEX,
