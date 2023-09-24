@@ -60,7 +60,7 @@ def ArraytoHandMap(landmark_list):
 
 def currentCursorMode(handMap):
 
-    errVar = 40
+    errVar = 30
 
     currentCursor = "none"
 
@@ -82,7 +82,7 @@ def currentCursorMode(handMap):
                 
                     
 
-                        if handMap['thumb']['four']['x']>handMap['thumb']['three']['x'] and handMap['thumb']['two']['x']>handMap['wrist']['one']['x']:
+                        if handMap['thumb']['four']['x']>handMap['thumb']['three']['x']:
 
                             currentCursor = "rightarrow"
 
@@ -211,9 +211,9 @@ def main():
 
                     if previousClick != currentClick and currentClick: mouse.click(button='left')
 
-                    if clickCounter>6:
+                    if clickCounter>7:
                         scrollStarting = (handMap['index']['four']['y'] + handMap['thumb']['four']['y'])/2
-                        if clickCounter<9: previousScroll = scrollStarting
+                        if clickCounter<10: previousScroll = scrollStarting
                         mouse.wheel((scrollStarting - previousScroll)/20)
                     
                     previousClick = currentClick
@@ -255,10 +255,10 @@ def main():
 
         
 
-                    if abs(handMap['index']['four']['x'] - previousIndexX)<6:
+                    if abs(handMap['index']['four']['x'] - previousIndexX)<7:
                         handMap['index']['four']['x'] = previousIndexX
                     
-                    if abs(handMap['index']['four']['y'] - previousIndexY)<6:
+                    if abs(handMap['index']['four']['y'] - previousIndexY)<7:
                         handMap['index']['four']['y'] = previousIndexY
                     
                     if currentCursor=='volume':
@@ -279,7 +279,7 @@ def main():
                     previousCursor=currentCursor
                     
                     
-                    mouse.move(((handMap['index']['four']['x']+handMap['thumb']['four']['x'])/2)*2, ((handMap['index']['four']['y']+handMap['thumb']['four']['y'])/2)*2, absolute=True)
+                    mouse.move((((handMap['index']['four']['x']+handMap['thumb']['four']['x'])/2)*2)-300, (((handMap['index']['four']['y']+handMap['thumb']['four']['y'])/2)*2)-300, absolute=True)
                     
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
                 debug_image = draw_info_text(debug_image, brect)
