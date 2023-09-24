@@ -16,8 +16,6 @@ from utils import CvFpsCalc
 from model import KeyPointClassifier
 from model import PointHistoryClassifier
 
-
-
 def get_args():
     parser = argparse.ArgumentParser()
 
@@ -38,7 +36,6 @@ def get_args():
     args = parser.parse_args()
 
     return args
-
 
 def main():
     args = get_args()
@@ -103,9 +100,14 @@ def main():
     clickCounter = 0
     scrollStarting = 0
     previousScroll = 0
+    frame_count = 0  # To keep track of frames for 60 FPS
     while True:
+        frame_count += 1
+        if frame_count % 3 != 0:  # Update display every 3rd frame
+            continue
         fps = cvFpsCalc.get()
-        key = cv.waitKey(10)
+        key = cv.waitKey(1)  # Reduced wait time
+
         if key == 27:  # ESC
             break
         number, mode = select_mode(key, mode)
@@ -145,8 +147,6 @@ def main():
                 thumbX = landmark_list[4][0]
                 thumbY = landmark_list[4][1]
 
-               
-
                 if abs(indexFingerX - thumbX) < 40 and abs(indexFingerY - thumbY) < 40:
                     currentClick=True
                     if clickCounter<50:
@@ -157,20 +157,16 @@ def main():
                     scrollStarting = 0
                     previousScroll = 0
 
-                
                 if previousClick != currentClick and currentClick:
                     mouse.click(button='left')
-
 
                 if clickCounter>12:
                     scrollStarting = (indexFingerY + thumbY)/2
                     if clickCounter<14:
                         previousScroll = scrollStarting
-                    mouse.wheel((scrollStarting - previousScroll)/35)
+                    mouse.wheel((scrollStarting - previousScroll)/20)
+                    mouse.move(((indexFingerX + thumbX)/2)*1.25,scrollStarting*1.25)
 
-                    
-
-                
                 previousClick = currentClick
                 previousScroll = scrollStarting
                 wristX = landmark_list[0][0]
@@ -184,19 +180,6 @@ def main():
  
                 if hand_sign_id == 2: 
                     mouse.move(((indexFingerX+thumbX)/2)*1.25, ((indexFingerY+thumbY)/2)*1.25, absolute=True)
-
-                '''if indexFingerY<landmark_list[11][1] and landmark_list[10][1]<landmark_list[9][1]:
-                    if middleFingerY<landmark_list[7][1] and landmark_list[7][1]<landmark_list[6][1]:
-                        if landmark_list[4][1]>landmark_list[5][1] and landmark_list[16][1]>landmark_list[5][1] and landmark_list[20][1]>landmark_list[5][1]:
-                            if abs(indexFingerY-middleFingerY)<130:
-                                previousAverage = (previousMiddleY+previousIndexY)/2
-                                currentAverage = (indexFingerY+middleFingerY)/2
-                                scroll = currentAverage-previousAverage
-                                if scroll>10:
-                                    scroll=scroll/40
-                                    mouse.wheel(delta=scroll)'''
-                
-
 
                 finger_gesture_id = 0
                 point_history_len = len(pre_processed_point_history_list)
@@ -222,13 +205,10 @@ def main():
             point_history.append([0, 0])
 
         debug_image = draw_info(debug_image, fps, mode, number)
-        """cv.namedWindow('Hand Gesture Recognition', cv.WINDOW_NORMAL)
-        cv.setWindowProperty('Hand Gesture Recognition',cv.WND_PROP_FULLSCREEN,cv.WINDOW_FULLSCREEN)"""
         cv.imshow('Hand Gesture Recognition', debug_image)
 
     cap.release()
     cv.destroyAllWindows()
-
 
 def select_mode(key, mode):
     number = -1
@@ -241,7 +221,6 @@ def select_mode(key, mode):
     if key == 104:  # h
         mode = 2
     return number, mode
-
 
 def calc_bounding_rect(image, landmarks):
     image_width, image_height = image.shape[1], image.shape[0]
@@ -256,7 +235,6 @@ def calc_bounding_rect(image, landmarks):
     x, y, w, h = cv.boundingRect(landmark_array)
     return [x, y, x + w, y + h]
 
-
 def calc_landmark_list(image, landmarks):
     image_width, image_height = image.shape[1], image.shape[0]
     landmark_point = []
@@ -267,7 +245,6 @@ def calc_landmark_list(image, landmarks):
         landmark_point.append([landmark_x, landmark_y])
 
     return landmark_point
-
 
 def pre_process_landmark(landmark_list):
     temp_landmark_list = copy.deepcopy(landmark_list)
@@ -288,7 +265,6 @@ def pre_process_landmark(landmark_list):
     temp_landmark_list = list(map(normalize_, temp_landmark_list))
     return temp_landmark_list
 
-
 def pre_process_point_history(image, point_history):
     image_width, image_height = image.shape[1], image.shape[0]
     temp_point_history = copy.deepcopy(point_history)
@@ -305,7 +281,6 @@ def pre_process_point_history(image, point_history):
         itertools.chain.from_iterable(temp_point_history))
 
     return temp_point_history
-
 
 def logging_csv(number, mode, landmark_list, point_history_list):
     if mode == 0:
@@ -328,7 +303,6 @@ def draw_bounding_rect(use_brect, image, brect):
                      (0, 0, 0), 1)
     return image
 
-
 def draw_info_text(image, brect, handedness, hand_sign_text,
                    finger_gesture_text, handMotions, point_history):
     cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[1] - 22),
@@ -347,14 +321,9 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0), 4, cv.LINE_AA)
         cv.putText(image, "Finger Gesture:" + finger_gesture_text, (10, 60),
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2,
-                   cv.LINE_AA)  
-        """if hand_sign_text == "Open" and previousHand == "Close":
-            keyboard.press_and_release("space")
-        elif hand_sign_text == "Close" and previousHand == "Pointer":
-            mouse.click(button='left')"""
+                   cv.LINE_AA)
         handMotions.append(hand_sign_text)
     return image, previousHand 
-
 
 def draw_info(image, fps, mode, number):
     cv.putText(image, "FPS:" + str(fps), (10, 30), cv.FONT_HERSHEY_SIMPLEX,
@@ -372,7 +341,6 @@ def draw_info(image, fps, mode, number):
                        cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1,
                        cv.LINE_AA)
     return image
-
 
 if __name__ == '__main__':
     main()
