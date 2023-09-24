@@ -26,7 +26,7 @@ const ReviewsSection = () => {
 
   return (
     <section
-      className="h-screen w-screen cursor-pointer select-none flex flex-col items-center"
+      className="h-screen cursor-pointer select-none flex flex-col items-center"
       onClick={handleClick}
     >
       <p className="text-7xl text-center font-display pb-4">

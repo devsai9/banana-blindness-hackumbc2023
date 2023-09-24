@@ -9,7 +9,7 @@ const WhySection = () => {
   const [visible, setVisible] = useState<boolean>(false);
 
   return (
-    <section className="h-screen w-screen flex flex-col items-center ">
+    <section className="h-screen flex flex-col items-center ">
       <h2 className="text-center pb-8">why banana blindness?</h2>
       {visible ? (
         <p className="font-black text-8xl text-center mb-6">we&apos;re broke</p>
