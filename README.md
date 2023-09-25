@@ -19,5 +19,5 @@ Here is a list of the available hand gestures:
 | Images |  <img src="readme/cursor.jpg" width="250"><br>[Source](https://www.istockphoto.com/photos/small-hand-gesture)  |  <img src="readme/click.jpg" width="250"><br>[Source](https://www.istockphoto.com/photo/male-hand-with-thumb-and-index-finger-touching-white-background-gm186829908-16875331)  |  <img src="readme/rewind.jpg" width="250"><br>[Source](https://stock.adobe.com/images/hand-pointing-right-with-a-thumb-isolated-on-white-background/243908916)  |  <img src="readme/forward.jpg" width="250"><br>[Source](https://stock.adobe.com/images/hand-pointing-right-with-a-thumb-isolated-on-white-background/243908916)  |
 
 # Links
-[Devpost](#)<br>
-[Website](#)
+[Devpost](https://devpost.com/software/banana-blindness)<br>
+[Website](https://banana-blindness.vercel.app/)
